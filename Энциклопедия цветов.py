@@ -1,7 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
-import json
 
 plants_by_letter = {
     'А': ['Астра', 'Азалия', 'Амарант'],
@@ -33,7 +32,7 @@ plants_by_letter = {
 }
 
 plant_details = {
-    'Астра': ('Травяничтый многолетник, известный своими разнообразными формами цветков и широкой палитрой окрасок от белой до тёмно-фиолетовой', "C:/Users/honor/OneDrive/Рабочий стол/энциклопедия цветы/астра.jpeg"),
+    'Астра': ('Травяничтый многолетник, известный своими разнообразными формами цветков и широкой палитрой окрасок от белой до тёмно-фиолетовой', 'C:/Users/honor/OneDrive/Рабочий сто/энциклопедия цветы/астра.jpeg'),
     'Азалия': ('Вечнозелёный кустарник семейства вересковых, популярное комнатное растение с яркими цветами различных оттенков розового, красного и белого цветов.', "C:/Users/honor/OneDrive/Рабочий стол/энциклопедия цветы/азалия.jpg"),
     'Амарант': ('Однолетнее травянистое растение, используется как декоративная культура и источник семян, богатых белком и витаминами.',"C:/Users/honor/OneDrive/Рабочий стол/энциклопедия цветы/амарант.jpg"),
     'Бархатцы': ('Яркое однолетнее растение с оранжевыми, жёлтыми или красными соцветиями, обладающее лекарственными свойствами.',"C:/Users/honor/OneDrive/Рабочий стол/энциклопедия цветы/бархатцы.jpeg"),
@@ -94,114 +93,9 @@ plant_details = {
     'Ясколка': ('Наземное низкорослое растение с игольчатыми узкими листьями и серебряными мелкими цветами, подходит для каменистых участков и альпийских горок.', "C:/Users/honor/OneDrive/Рабочий стол/энциклопедия цветы/ясколка.jpeg"),
 }
 
-NOTES_FILE = "notes.json"
-
-
-def load_notes():
-    try:
-        with open(NOTES_FILE, "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return []
-
-
-def save_note(title, content):
-    notes = load_notes()
-    new_note = {"title": title, "content": content}
-    notes.append(new_note)
-    with open(NOTES_FILE, "w") as file:
-        json.dump(notes, file, indent=4)
-
-
-def create_note_window():
-    def submit_note():
-        title = entry_title.get().strip()
-        content = entry_content.get('1.0', tk.END).strip()
-
-        if not title or not content:
-            tk.messagebox.showwarning("Ошибка", "Необходимо заполнить оба поля!")
-            return
-
-        save_note(title, content)
-        note_win.destroy()
-
-    note_win = tk.Toplevel(root)
-    note_win.title("Новая заметка")
-
-    frame = tk.Frame(note_win)
-    frame.pack(padx=10, pady=10)
-
-    label_title = tk.Label(frame, text="Заголовок заметки:", anchor="w")
-    label_title.grid(row=0, column=0, sticky="w")
-
-    entry_title = tk.Entry(frame, width=40)
-    entry_title.grid(row=0, column=1, pady=(0, 10), sticky="ew")
-
-    label_content = tk.Label(frame, text="Содержание заметки:", anchor="w")
-    label_content.grid(row=1, column=0, sticky="w")
-
-    entry_content = tk.Text(frame, wrap=tk.WORD, width=40, height=8)
-    entry_content.grid(row=1, column=1, rowspan=3, sticky="nsew")
-
-    button_submit = tk.Button(frame, text="Создать заметку", command=submit_note)
-    button_submit.grid(row=4, column=0, columnspan=2, pady=10)
-
-
-def view_notes():
-    notes = load_notes()
-    if not notes:
-        tk.messagebox.showinfo("Информация", "Пока нет никаких заметок.")
-        return
-
-    view_win = tk.Toplevel(root)
-    view_win.title("Просмотр заметок")
-
-    list_frame = tk.Frame(view_win)
-    list_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-    scrollbar = tk.Scrollbar(list_frame)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-    listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set)
-    listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-    scrollbar.config(command=listbox.yview)
-
-    for idx, note in enumerate(notes):
-        listbox.insert(tk.END, note["title"])
-
-    def show_note(event=None):
-        selected_idx = listbox.curselection()[0]
-        current_note = notes[selected_idx]
-        detail_text.configure(state=tk.NORMAL)
-        detail_text.delete('1.0', tk.END)
-        detail_text.insert(tk.END, f"Тема: {current_note['title']}\n\n{current_note['content']}")
-        detail_text.configure(state=tk.DISABLED)
-
-    listbox.bind("<Double-Button-1>", show_note)
-
-    detail_frame = tk.Frame(view_win)
-    detail_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-
-    detail_text = tk.Text(detail_frame, wrap=tk.WORD, state=tk.DISABLED)
-    detail_text.pack(fill=tk.BOTH, expand=True)
-
-
-def open_notes_menu():
-    menu_win = tk.Toplevel(root)
-    menu_win.title("Менеджер заметок")
-
-    button_create = tk.Button(menu_win, text="Создать новую заметку", command=create_note_window)
-    button_create.pack(pady=10)
-
-    button_view = tk.Button(menu_win, text="Посмотреть существующие заметки", command=view_notes)
-    button_view.pack(pady=10)
-
-#исходный код
 def on_button_click(letter):
     plants_for_letter = plants_by_letter.get(letter, [])
     show_plant_selection(letter, plants_for_letter)
-
 
 def show_plant_selection(letter, plants):
     selection_win = tk.Toplevel(root)
@@ -210,7 +104,6 @@ def show_plant_selection(letter, plants):
     for plant in plants:
         btn = tk.Button(selection_win, text=plant, command=lambda p=plant: show_plant_info(p))
         btn.pack(fill=tk.X, expand=True, padx=20, pady=10)
-
 
 def show_plant_info(plant_name):
     details = plant_details.get(plant_name, ("Описание не найдено", ""))
@@ -235,7 +128,6 @@ def show_plant_info(plant_name):
 
     tk.Button(info_win, text="Закрыть", command=info_win.destroy).pack(pady=10)
 
-
 root = tk.Tk()
 root.title("Энциклопедия цветов")
 
@@ -256,10 +148,6 @@ for i, l in enumerate(alphabet):
         bg=colors[i % len(colors)],
         font=("Arial", 14, "bold"),
         command=lambda letter=l: on_button_click(letter)
-    ).grid(row=i // 10, column=i % 10, padx=5, pady=5)
-
-#часть нового кода
-button_notes = tk.Button(root, text="Заметки", command=open_notes_menu)
-button_notes.grid(row=len(alphabet) // 10 + 1, column=0, columnspan=10, pady=10)
+    ).grid(row=i//10, column=i%10, padx=5, pady=5)
 
 root.mainloop()
